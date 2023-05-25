@@ -5,6 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import androidx.navigation.findNavController
 
 /**
  * A simple [Fragment] subclass.
@@ -17,7 +19,13 @@ class GamePlayFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_game_play, container, false)
+
+        val view = inflater.inflate(R.layout.fragment_game_play, container, false)
+        val gameOverButton = view.findViewById<Button>(R.id.game_over)
+
+        gameOverButton.setOnClickListener{
+            view.findNavController().navigate(R.id.action_gamePlayFragment2_to_gameOverFragment)
+        }
+        return view
     }
 }

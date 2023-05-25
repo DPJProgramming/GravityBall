@@ -1,23 +1,36 @@
 package com.example.gravityball
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import androidx.navigation.findNavController
+import kotlin.system.exitProcess
 
-/**
- * A simple [Fragment] subclass.
- * Use the [GameOverFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class GameOverFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_game_over, container, false)
+        val view = inflater.inflate(R.layout.fragment_game_over, container, false)
+        val playAgainButton = view.findViewById<Button>(R.id.play_again)
+        val quitButton = view.findViewById<Button>(R.id.quit)
+
+        playAgainButton.setOnClickListener{
+            view.findNavController().navigate(R.id.action_gameOverFragment_to_startScreenFragment)
+        }
+
+        quitButton.setOnClickListener{
+            val activity = MainActivity()
+            activity.finish()
+            exitProcess(0)
+        }
+
+
+        return view
     }
 }

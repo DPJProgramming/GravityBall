@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.navigation.findNavController
+import kotlin.system.exitProcess
 
 class StartScreenFragment : Fragment() {
 
@@ -17,8 +18,16 @@ class StartScreenFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_start_screen, container, false)
         val startButton = view.findViewById<Button>(R.id.start_game)
+        val mainQuitButton = view.findViewById<Button>(R.id.mainQuitButton)
+
         startButton.setOnClickListener{
             view.findNavController().navigate(R.id.action_startScreenFragment_to_gamePlayFragment)
+        }
+
+        mainQuitButton.setOnClickListener{
+            val activity = MainActivity()
+            activity.finish()
+            exitProcess(0)
         }
         return view
     }
