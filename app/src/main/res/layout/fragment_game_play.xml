@@ -1,14 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#a9e8ad"
     tools:context=".GamePlayFragment">
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="wrap_content"
+        android:layout_width="116dp"
         android:layout_height="wrap_content"
-        android:text="@string/gameplay" />
+        android:layout_marginTop="140dp"
+        android:text="gameplay goes here"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</FrameLayout>
+    <Button
+        android:id="@+id/game_over"
+        android:layout_width="151dp"
+        android:layout_height="77dp"
+        android:layout_marginTop="220dp"
+        android:text="go to game over screen"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/dangerZone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Danger Zone"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="#FF0000"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
