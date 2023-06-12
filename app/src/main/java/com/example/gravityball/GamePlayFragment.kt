@@ -12,11 +12,11 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationSet
 import android.widget.ImageView
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import kotlin.random.Random
 
 
@@ -41,32 +41,37 @@ class GamePlayFragment : Fragment() {
         val screen: ConstraintLayout = view.findViewById<ConstraintLayout>(R.id.display)
         val ball = view.findViewById<ImageView>(R.id.ball)
         val screenWidth: Int = resources.displayMetrics.widthPixels
-        val screenHeight: Int = resources.displayMetrics.widthPixels
+        val screenHeight: Int = (resources.displayMetrics.heightPixels)
+        val platform = view.findViewById<ImageView>(R.id.platform)
 
         //set animation for ball falling
-        //ball.animate().translationYBy(screenHeight.toFloat()).setDuration(2000)
-        //val ballDrop.interpolator = AccelerateInterpolator()
-        //animation.start()
-        //val ballAnimationSet = AnimationSet(true)
+        dropTheBall(ball, screenHeight, view, )
 
         //set touch controls and animate ball
-        screen.setOnTouchListener(object: View.OnTouchListener{
+        moveTheBall(screen, screenWidth, ball, screenHeight)
+
+        //begin platform animations
+        animatePlatforms(screen, screenWidth, platform, screenHeight)
+
+        return view
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun moveTheBall(screen: ConstraintLayout, screenWidth: Int, ball: ImageView, screenHeight: Int) {
+        screen.setOnTouchListener(object : View.OnTouchListener {
             @RequiresApi(Build.VERSION_CODES.R)
             @SuppressLint("ClickableViewAccessibility")
 
-            override fun onTouch(view: View, move: MotionEvent):Boolean{
+            override fun onTouch(view: View, move: MotionEvent): Boolean {
                 val touchPoint: Float = move.getX()
-                //val screenWidth: Int = resources.displayMetrics.widthPixels
-                //val windowMetrics = activity!!.windowManager.currentWindowMetrics
-                //val screenWidth = windowMetrics.bounds.width()
                 val touch: Int = move.getActionMasked()
 
-                when(touch){
+                when (touch) {
                     MotionEvent.ACTION_DOWN -> {
-                        Log.i("touchDown", "touck down is working")
+                        Log.i("touchDown", "touch down is working")
 
-                        //if right side of screen is pressed
-                        if(touchPoint < screenWidth && touchPoint > screenWidth/2){
+                        //if right side of screen is pressed, move ball right
+                        if (touchPoint < screenWidth && touchPoint > screenWidth / 2) {
                             Log.i("right", "touched right side")
 
                             var moveBall = ball.animate().translationXBy(1500f).setDuration(1500)
@@ -77,74 +82,92 @@ class GamePlayFragment : Fragment() {
 
                                 if (ballPosition + ball.width >= screenWidth) {
                                     moveBall.cancel()
+                                    dropTheBall(ball, screenHeight, view)
                                 }
                             }
                         }
 
-                        //if left is pressed
-                        else{
+                        //if left is pressed move left unless ball is at edge of screen
+                        else {
                             Log.i("touchDown", "touched left side")
 
                             //animate ball left
                             var moveBall = ball.animate().translationXBy(-1500f).setDuration(1500)
 
                             //sets listener for ball's position so it doesn't go out of bounds
-                            moveBall.setUpdateListener{
+                            moveBall.setUpdateListener {
                                 val ballPosition = ball.x
                                 if (ballPosition <= 0) {
                                     moveBall.cancel()
+                                    dropTheBall(ball, screenHeight, view)
                                 }
                             }
                         }
                     }
+
+                    //no longer touching the screen so the ball stops moving
                     MotionEvent.ACTION_UP -> {
                         Log.i("touchUp", "touch up is working")
                         ball.animate().cancel()
+                        dropTheBall(ball, screenHeight, view)
                     }
-//                    MotionEvent.ACTION_MOVE -> {
-//                    Log.i("touchMove", "touch move is working")
-//                    }
                 }
                 return true
             }
         })
-
-
-
-        animatePlatforms(screen)
-
-        return view
     }
 
-    private fun animatePlatforms(view: View){
-        // Initialize platform ImageView
+    private fun dropTheBall(ball: ImageView, screenHeight: Int, view: View) {
+        val ballDrop = ball.animate().translationYBy(screenHeight.toFloat()).setDuration(3000)
         val platform = view.findViewById<ImageView>(R.id.platform)
+        ballDrop.setUpdateListener {
+            var ballPosition = ball.y
+
+//            if(ball.y - ball.height >= platform.y){
+//                ballDrop.cancel()
+//                val ballUp = ball.animate().translationYBy(-2100f).setDuration(3000)
+//            }
+
+            if (ballPosition + ball.height + 225 >= screenHeight) {
+                ballDrop.cancel()
+            }
+
+            if (ballPosition <= 0) {
+                ballDrop.cancel()
+                view.findNavController().navigate(R.id.action_gamePlayFragment2_to_gameOverFragment)
+            }
+        }
+    }
+
+    private fun animatePlatforms(view: View, screenWidth: Int, platform: ImageView, screenHeight: Int){
+        // Initialize platform ImageView
+        //val platform = view.findViewById<ImageView>(R.id.platform)
 
         //make an array of directions to use for positioning the platform
-        //val position = arrayOf<String>("")
+        val position = arrayOf<Int>(0, screenWidth/2 - platform.width/2, screenWidth - platform.width)
+        val randomPosition = position[Random.nextInt(0, position.size-1)]
 
         //set platform to random platform in list
         val random = Random.nextInt(0, platformList.size)
         platform.setImageResource(platformList[random])
 
-        //set the height of platform so they are all the same height
-        platform.getLayoutParams().height = 50
+        //set the height of platform so they are all the same height and the width to match drawable
+        platform.layoutParams.height = 50
 
-        //get starting, desired end position, duration, and right of left positioning
-        val start = (platform.height.toFloat() + (view.height.toFloat() ?: 0f))
+        //get starting, desired end position, duration, and right left positioning
         val end = -2100f
-        val speed: Long = 2000
+        val speed: Long = 3000
+        platform.x = position[Random.nextInt(0, position.size)].toFloat()
 
         //move the platform
         val animation = platform.animate().translationYBy(end).setDuration(speed)
-        //animation.interpolator = AccelerateInterpolator()
-        //animation.start()
 
         //resets view to original position and calls animate again after delay
         animation.setListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
-                platform.y = start
-                handler.postDelayed({ animatePlatforms(view) }, 0)
+                platform.y = screenHeight + 40.toFloat()
+                platform.x = (screenWidth/2 - platform.width/2).toFloat()
+                handler.postDelayed({ animatePlatforms(view, screenWidth, platform, screenHeight) }, 0)
             }
         })
     }
